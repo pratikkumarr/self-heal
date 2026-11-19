@@ -1,0 +1,81 @@
+* { box-sizing: border-box; }
+:root {
+  color-scheme: dark;
+  --background: #0b111a;
+  --surface: #101927;
+  --border: #263448;
+  --text: #eef3fa;
+  --muted: #a4b2c6;
+  --teal: #70e4d0;
+  --danger: #ffa8a8;
+  --warning: #ffdc92;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+[hidden] { display: none !important; }
+body { margin: 0; background: var(--background); color: var(--text); }
+a { color: var(--teal); text-underline-offset: .2em; }
+a:focus-visible, button:focus-visible, summary:focus-visible { outline: 2px solid var(--teal); outline-offset: 4px; }
+.shell { width: min(1200px, calc(100% - 48px)); margin-inline: auto; }
+.topbar { border-bottom: 1px solid var(--border); background: #0e1622; }
+.topbar-inner, .page-header, .toolbar, .incident-heading {
+  display: flex; align-items: center; justify-content: space-between; gap: 16px;
+}
+.topbar-inner { min-height: 64px; }
+.brand { display: flex; align-items: center; gap: 10px; color: var(--text); text-decoration: none; font-weight: 700; }
+.mark { display: grid; place-items: center; border-radius: 9px; background: #163d40; color: var(--teal); width: 33px; height: 33px; font-size: 23px; }
+.storage { color: var(--muted); font-size: .82rem; text-align: right; }
+main { padding-block: 47px 56px; }
+.page-header { margin-bottom: 25px; }
+h1, h2, h3, p { margin: 0; }
+h1 { font-size: clamp(1.85rem, 4vw, 2.75rem); letter-spacing: -.045em; line-height: 1.12; }
+.target { display: inline-block; margin-top: 9px; font-size: .9rem; overflow-wrap: anywhere; }
+nav, .incident-links { display: flex; gap: 9px; flex-wrap: wrap; }
+.button {
+  border: 1px solid var(--border); border-radius: 8px; background: #162235; color: var(--text);
+  font: inherit; font-size: .85rem; font-weight: 650; line-height: 1.15; padding: 10px 13px;
+  text-decoration: none; cursor: pointer;
+}
+.button:hover { filter: brightness(1.2); }
+.button:disabled { cursor: wait; opacity: .55; }
+.primary { background: var(--teal); color: #082620; border-color: transparent; }
+.metrics { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+.metric, .panel { border: 1px solid var(--border); border-radius: 13px; background: var(--surface); }
+.metric { min-height: 125px; padding: 18px 19px; overflow-wrap: anywhere; }
+.metric h2 { font-size: .83rem; color: var(--muted); font-weight: 650; }
+.metric .value { margin: 7px 0 5px; font-size: clamp(1rem, 2vw, 1.5rem); font-weight: 700; }
+.muted, .empty { color: var(--muted); font-size: .85rem; line-height: 1.5; }
+.mono { font-family: ui-monospace, Consolas, monospace; }
+.toolbar { margin-block: 16px; }
+.panel + .panel { margin-top: 15px; }
+.panel-title { padding: 17px 19px; border-bottom: 1px solid var(--border); }
+.panel-title h2 { font-size: 1rem; }
+.empty { padding: 20px; }
+.table-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; text-align: left; font-size: .85rem; white-space: nowrap; }
+th, td { padding: 11px 19px; border-bottom: 1px solid var(--border); }
+th { color: var(--muted); font-weight: 600; }
+tr:last-child td { border-bottom: 0; }
+.pill { display: inline-block; padding: 3px 8px; line-height: 1.3; border-radius: 6px; background: #223147; font-size: .79rem; color: #d4deed; }
+.pill.good { color: var(--teal); background: #133835; }
+.pill.bad { color: var(--danger); background: #41252e; }
+.pill.pending { color: var(--warning); background: #383123; }
+.good { color: var(--teal); }
+.bad { color: var(--danger); }
+.incident { padding: 17px 19px; border-bottom: 1px solid var(--border); overflow-wrap: anywhere; }
+.incident:last-child { border-bottom: 0; }
+.incident h3 { font-size: .97rem; }
+.incident .muted { margin-top: 5px; }
+.incident details { margin-top: 12px; }
+summary { cursor: pointer; font-size: .9rem; color: var(--teal); }
+.finding { margin-top: 10px; font-size: .88rem; line-height: 1.5; }
+.finding strong { display: block; }
+.incident-links { margin-top: 12px; align-items: center; font-size: .85rem; }
+pre { white-space: pre-wrap; overflow-wrap: anywhere; font-size: .81rem; }
+@media (max-width: 720px) {
+  .shell { width: calc(100% - 28px); }
+  main { padding-top: 28px; }
+  .page-header { align-items: flex-start; flex-direction: column; }
+  .metrics { grid-template-columns: 1fr; gap: 9px; }
+  .metric { min-height: auto; }
+  th, td { padding-inline: 13px; }
+}

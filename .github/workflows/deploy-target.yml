@@ -1,0 +1,103 @@
+name: Deploy target and verify recovery
+on:
+  workflow_dispatch:
+    inputs:
+      operation:
+        description: Approved target release or replay an existing observation
+        type: choice
+        options: [v1, v2, report]
+        required: true
+      deploy_id:
+        description: Render deploy ID for report mode
+        type: string
+      baseline_deploy_id:
+        description: Previous live deploy ID from the original workflow log, for report mode
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: render-target
+  cancel-in-progress: false
+
+jobs:
+  candidate-ci:
+    if: github.ref_name == github.event.repository.default_branch && inputs.operation != 'report'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    outputs:
+      sha: ${{ steps.select.outputs.sha }}
+    steps:
+      - name: Select approved commit
+        id: select
+        env:
+          OPERATION: ${{ inputs.operation }}
+          V1_SHA: ${{ vars.TARGET_V1_SHA }}
+          V2_SHA: ${{ vars.TARGET_V2_SHA }}
+        run: |
+          case "$OPERATION" in
+            v1) sha="$V1_SHA" ;;
+            v2) sha="$V2_SHA" ;;
+            *) exit 1 ;;
+          esac
+          if [[ ! "$sha" =~ ^[a-f0-9]{40}$ ]]; then
+            echo "::error::Set TARGET_V1_SHA and TARGET_V2_SHA to full approved commit SHAs."
+            exit 1
+          fi
+          echo "sha=$sha" >> "$GITHUB_OUTPUT"
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ steps.select.outputs.sha }}
+          persist-credentials: false
+      - uses: actions/setup-python@v6
+        with:
+          python-version-file: .python-version
+      - run: python -m pip install -r target_app/requirements.txt "httpx>=0.28,<1"
+      - name: Smoke test candidate boot, version, and readiness route
+        env:
+          RELEASE_VERSION: ${{ inputs.operation }}
+        run: |
+          python - <<'PY'
+          import os
+          from fastapi.testclient import TestClient
+          from target_app.main import app
+
+          with TestClient(app) as client:
+              assert client.get("/").status_code == 200
+              assert client.get("/version").json()["version"] == os.environ["RELEASE_VERSION"]
+              readiness = client.get("/health")
+              assert readiness.status_code in (200, 503)
+              assert readiness.json()["status"] in ("healthy", "unhealthy")
+          PY
+
+  render:
+    needs: candidate-ci
+    if: >-
+      ${{ always() && !cancelled() &&
+          github.ref_name == github.event.repository.default_branch &&
+          (inputs.operation == 'report' || needs.candidate-ci.result == 'success') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    environment: render-target
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v6
+        with:
+          python-version-file: .python-version
+      - run: python -m pip install "httpx>=0.28,<1"
+      - name: Observe Render and report verified outcome
+        env:
+          OPERATION: ${{ inputs.operation }}
+          EXPECTED_SHA: ${{ needs.candidate-ci.outputs.sha }}
+          V1_SHA: ${{ vars.TARGET_V1_SHA }}
+          REPORT_DEPLOY_ID: ${{ inputs.deploy_id }}
+          BASELINE_DEPLOY_ID: ${{ inputs.baseline_deploy_id }}
+          TARGET_URL: ${{ vars.TARGET_URL }}
+          MONITOR_URL: ${{ vars.MONITOR_URL }}
+          RENDER_TARGET_SERVICE_ID: ${{ vars.RENDER_TARGET_SERVICE_ID }}
+          RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
+          MONITOR_INGEST_TOKEN: ${{ secrets.MONITOR_INGEST_TOKEN }}
+        run: python -m backend.deploy_target

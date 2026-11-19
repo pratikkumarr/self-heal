@@ -1,0 +1,4 @@
+-r target_app/requirements.txt
+httpx>=0.28,<1
+psycopg[binary]>=3.2.10,<4
+python-dotenv>=1.1,<2

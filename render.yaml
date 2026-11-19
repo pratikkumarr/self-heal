@@ -1,0 +1,24 @@
+services:
+  - name: selfheal-target
+    type: web
+    runtime: python
+    plan: free
+    branch: release/target
+    autoDeployTrigger: 'off'
+    buildCommand: pip install -r target_app/requirements.txt
+    startCommand: python -m uvicorn target_app.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+
+  - name: selfheal-monitor
+    type: web
+    runtime: python
+    plan: free
+    autoDeployTrigger: 'off'
+    buildCommand: pip install -r requirements.txt
+    startCommand: python -m uvicorn backend.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    envVars:
+      - key: DATABASE_URL
+        sync: false
+      - key: MONITOR_INGEST_TOKEN
+        sync: false

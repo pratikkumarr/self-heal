@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <title>Self-Healing Pipeline</title>
+  <link rel="stylesheet" href="/assets/styles.css">
+  <script src="/assets/app.js" defer></script>
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell topbar-inner">
+      <a class="brand" href="/"><span class="mark" aria-hidden="true">↯</span> Self-Healing Pipeline</a>
+      <span id="storage" class="storage"></span>
+    </div>
+  </header>
+  <main class="shell">
+    <section class="page-header">
+      <div>
+        <h1>Deployment monitor</h1>
+        <a id="target-url" class="target" hidden></a>
+      </div>
+      <nav aria-label="Deployment controls">
+        <a id="render-link" class="button" hidden>Render deploys ↗</a>
+        <a id="actions-link" class="button primary" hidden>Run deployment ↗</a>
+      </nav>
+    </section>
+    <section class="metrics" aria-label="Target overview">
+      <article class="metric">
+        <h2>Public readiness</h2>
+        <p id="health" class="value">Loading…</p>
+        <p id="health-detail" class="muted"></p>
+      </article>
+      <article class="metric">
+        <h2>Serving release</h2>
+        <p id="version" class="value">—</p>
+        <p id="commit" class="muted mono"></p>
+      </article>
+      <article class="metric">
+        <h2>Live Render deploy</h2>
+        <p id="live" class="value">—</p>
+        <p id="live-detail" class="muted"></p>
+      </article>
+    </section>
+    <div class="toolbar">
+      <p id="refresh-state" class="muted" role="status">Fetching observations…</p>
+      <button id="refresh" class="button" type="button">Refresh</button>
+    </div>
+    <section class="panel" aria-labelledby="history-heading">
+      <div class="panel-title"><h2 id="history-heading">Render deployment history</h2></div>
+      <p id="history-empty" class="empty">Loading…</p>
+      <div id="history" class="table-wrap" hidden>
+        <table>
+          <thead><tr><th scope="col">Deploy ID</th><th scope="col">Commit</th><th scope="col">Status</th><th scope="col">Trigger</th><th scope="col">Updated</th></tr></thead>
+          <tbody id="deploy-rows"></tbody>
+        </table>
+      </div>
+    </section>
+    <section class="panel" aria-labelledby="incidents-heading">
+      <div class="panel-title"><h2 id="incidents-heading">Recorded incidents</h2></div>
+      <p id="incidents-empty" class="empty">Loading…</p>
+      <div id="incident-rows"></div>
+    </section>
+  </main>
+</body>
+</html>
